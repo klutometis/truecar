@@ -438,9 +438,7 @@
   #+BEGIN_QUOTE
   This simplifies the CPython implementation by making the object
   model (including critical built-in types such as dict) implicitly
-  safe against concurrent access.
-
-  It is believed that overcoming this performance issue would make the
-  implementation much more complicated and therefore costlier to
-  maintain.
+  safe against concurrent access. . . It is believed that overcoming
+  this performance issue would make the implementation much more
+  complicated and therefore costlier to maintain.
   #+END_QUOTE
