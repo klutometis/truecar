@@ -1,0 +1,395 @@
+* TODO GIL
+  - [[http://jessenoller.com/blog/2009/02/01/python-threads-and-the-global-interpreter-lock][Wordy]], but not bad.
+
+    #+BEGIN_QUOTE
+    However, while CPython does use operating system threads (in
+    theory allowing multiple threads to execute within the interpreter
+    simultaneously), the interpreter also forces the GIL to be
+    acquired by a thread before it can access the interpreter and
+    stack and can modify Python objects in memory all willy-nilly. The
+    latter point is why the GIL exists: The GIL prevents simultaneous
+    access to Python objects by multiple threads. But this does not
+    save you (as illustrated by the Bank example) from being a
+    lock-sensitive creature; you don’t get a free ride. The GIL is
+    there to protect the interpreters memory, not your sanity.
+    #+END_QUOTE
+    
+    [[http://en.wikipedia.org/wiki/CPython][CPython]], the canonical implementation; alongside: Jython, PyPy,
+    &c.
+    
+    #+BEGIN_QUOTE
+    The GIL also keeps garbage collection (the reason you don’t have
+    to worry about memory management, you bum) working. It prevents
+    one thread from decrementing the counters for an object and
+    letting the object go into the ether while another object is
+    working with that object. Python’s garbage collection
+    (deallocating unused objects to free memory) utilizes the concept
+    of reference counting. This is where all references to a given
+    object (integer, string or ‘’YourCat(object)’’) are tracked. When
+    the number of references reaches zero, the object is deleted. The
+    GIL prevents any two threads from decrementing the reference count
+    to any object to 0 while another thread is working on that object.
+    Remember, only one thread can access a Python object at a time.
+    #+END_QUOTE
+    
+    #+BEGIN_QUOTE
+    Python has had threading support, and the GIL, since as far back
+    as version 1.5, so it’s not new. In 1999 Greg Stein created a
+    patch set for the interpreter that removed the GIL, but added
+    granular locking around sensitive interpreter operations. This
+    patch set had the direct effect of speeding up threaded execution,
+    but made single threaded execution two times slower.
+    #+END_QUOTE
+    
+    #+BEGIN_QUOTE
+    That all being said, the CPython interpreter, when working with
+    pure Python code (more on this in a moment) will force the GIL to
+    be released every hundred byte code instructions. This means that
+    if you have a complex line of code like a complex math function
+    that in reality acts as a single byte code the GIL will not be
+    released for the period that that statement takes to run.
+    #+END_QUOTE
+    
+    #+BEGIN_QUOTE
+    There is an exception though: C modules! C extension modules (and
+    built in C modules) can be built in such a way that they release
+    the GIL voluntarily and do their own magic. Take for instance the
+    time module (‘’timemodule.c’’ in the Python source tree). The
+    ‘’sleep()’’ function looks something like this:
+
+    ...
+    Py_BEGIN_ALLOW_THREADS
+        sleep((int)secs);
+    Py_END_ALLOW_THREADS
+    ....
+
+    In a C extension, the ‘’Py_BEGIN_ALLOW_THREADS’’ and
+    ‘’Py_END_ALLOW_THREADS’’ macros signal the interpreter and
+    basically state “hey, I’m entering some blocking operation, here’s
+    the GIL back” and “hey, I’m returning, I need the GIL”. This means
+    that anything in your application that uses a blocking I/O
+    function (network/socket manipulation, file manipulation) or a
+    thread-safe C extension (most of the built-in ones are) can
+    “bypass” the GIL. This means you can get closer to having multiple
+    threads running at concurrently.
+    #+END_QUOTE
+
+    #+BEGIN_QUOTE
+    From a programming standpoint, the GIL is equivalent to wrapping
+    all of your code in a ‘’synchronize’’ keyword (without the memory
+    safety). No two threads can run at once, they can only seem to via
+    GIL acquisition/releasing tricks.
+    #+END_QUOTE
+    
+    Little bit of BDFL apologetics:
+    
+    #+BEGIN_QUOTE
+    The fact is, the GIL does prevent you as a programmer from using
+    multiple CPUs simultaneously. Python as a language, however, does
+    not. If the CPython interpreter had the GIL removed, the operating
+    system’s pthread system would be free to run everything in
+    parallel. The GIL does not prevent a process from running on a
+    different processor of a machine. It simply only allows one thread
+    to run at once within the interpreter.
+
+    The real question you have to ask yourself is: does the GIL actually
+    affect you and your application? Is it really harming you or is it
+    simply a convenient excuse for people to dismiss Python? Let’s
+    examine code and numbers.
+    #+END_QUOTE
+    
+    #+BEGIN_QUOTE
+    Python itself has good threading support, including all of the
+    locking primitives, queues, events and semaphores. That’s
+    everything Java and many other languages have, including some
+    higher-level “cool” thread things. Can CPython take advantage of
+    multiple threads for concurrency? Yes, with caveats. The caveats
+    applied hamper a particular segment of application developers for
+    sure, but for most of us working in high I/O environments,
+    CPython’s thread system with the GIL works out fine. Even in those
+    environments though, threads may not be the fastest option.
+    #+END_QUOTE
+    
+    #+BEGIN_QUOTE
+    An important point to remember: The GIL is an interpreter issue.
+    This means that, again, other interpreters, such as Jython and
+    IronPython do not suffer the “penalty” of the GIL. In the same
+    vein, there are a few people out there currently working with the
+    Python code base to experiment with the removal of the GIL in the
+    CPython interpreter.
+    #+END_QUOTE
+    
+    Talk about disabling the GIL, by the way:
+
+    #+BEGIN_QUOTE
+    Guido (the BDFL) has already expressed openness to accepting a
+    patch set to the CPython tree that could optionally enable or
+    disable the GIL or, if some enterprising individual wanted to, to
+    implement the interpreter in such a way as to remove the GIL
+    entirely without sacrificing single threaded performance.
+    #+END_QUOTE
+    
+    Is that the same as releasing the global interpreter lock?
+
+  - Go [[http://docs.python.org/2/c-api/init.html#thread-state-and-the-global-interpreter-lock][straight to the docs]]:
+    
+    #+BEGIN_QUOTE
+    The Python interpreter is not fully thread-safe. In order to
+    support multi-threaded Python programs, there’s a global lock,
+    called the global interpreter lock or GIL, that must be held by
+    the current thread before it can safely access Python objects.
+    Without the lock, even the simplest operations could cause
+    problems in a multi-threaded program: for example, when two
+    threads simultaneously increment the reference count of the same
+    object, the reference count could end up being incremented only
+    once instead of twice.
+
+    Therefore, the rule exists that only the thread that has acquired the
+    GIL may operate on Python objects or call Python/C API functions.
+    In order to emulate concurrency of execution, the interpreter
+    regularly tries to switch threads (see sys.setcheckinterval()).
+    The lock is also released around potentially blocking I/O
+    operations like reading or writing a file, so that other Python
+    threads can run in the meantime.
+    #+END_QUOTE
+    
+    This whole fucking section:
+    
+    #+BEGIN_QUOTE
+    Most extension code manipulating the GIL has the following simple
+    structure:
+
+    #+BEGIN_SRC python
+      Save the thread state in a local variable.
+      Release the global interpreter lock.
+      ... Do some blocking I/O operation ...
+      Reacquire the global interpreter lock.
+      Restore the thread state from the local variable.
+
+      This is so common that a pair of macros exists to simplify it:
+      Py_BEGIN_ALLOW_THREADS
+      ... Do some blocking I/O operation ...
+      Py_END_ALLOW_THREADS
+    #+END_SRC
+
+    The Py_BEGIN_ALLOW_THREADS macro opens a new block and declares a
+    hidden local variable; the Py_END_ALLOW_THREADS macro closes the
+    block. These two macros are still available when Python is
+    compiled without thread support (they simply have an empty
+    expansion).
+
+    When thread support is enabled, the block above expands to the
+    following code:
+
+    #+BEGIN_SRC python
+      PyThreadState *_save;
+      
+      _save = PyEval_SaveThread();
+      ...Do some blocking I/O operation...
+      PyEval_RestoreThread(_save);
+    #+END_SRC
+
+    Here is how these functions work: the global interpreter lock is used
+    to protect the pointer to the current thread state. When releasing
+    the lock and saving the thread state, the current thread state
+    pointer must be retrieved before the lock is released (since
+    another thread could immediately acquire the lock and store its
+    own thread state in the global variable). Conversely, when
+    acquiring the lock and restoring the thread state, the lock must
+    be acquired before storing the thread state pointer.
+
+    Note: Calling system I/O functions is the most common use case for
+    releasing the GIL, but it can also be useful before calling
+    long-running computations which don’t need access to Python
+    objects, such as compression or cryptographic functions operating
+    over memory buffers. For example, the standard zlib and hashlib
+    modules release the GIL when compressing or hashing data.
+    #+END_QUOTE
+    
+  - Also [[http://docs.python.org/2/glossary.html#term-gil][here]]:
+    
+    #+BEGIN_QUOTE
+    The mechanism used by the CPython interpreter to assure that only
+    one thread executes Python bytecode at a time. This simplifies the
+    CPython implementation by making the object model (including
+    critical built-in types such as dict) implicitly safe against
+    concurrent access. Locking the entire interpreter makes it easier
+    for the interpreter to be multi-threaded, at the expense of much
+    of the parallelism afforded by multi-processor machines.
+
+    However, some extension modules, either standard or third-party, are
+    designed so as to release the GIL when doing
+    computationally-intensive tasks such as compression or hashing.
+    Also, the GIL is always released when doing I/O.
+
+    Past efforts to create a “free-threaded” interpreter (one which locks
+    shared data at a much finer granularity) have not been successful
+    because performance suffered in the common single-processor case.
+    It is believed that overcoming this performance issue would make
+    the implementation much more complicated and therefore costlier to maintain.
+    #+END_QUOTE
+
+  - See [[http://www.artima.com/weblogs/viewpost.jsp?thread%3D214235][Guido's response to Juergen]]:
+    
+    #+BEGIN_QUOTE
+    I want to point out one more time that the language doesn’t
+    require the GIL – it’s only the CPython virtual machine that has
+    historically been unable to shed it.
+    #+END_QUOTE
+
+  - See [[http://docs.python.org/2/faq/library#can-t-we-get-rid-of-the-global-interpreter-lock][Can't we git rid of the GIL]]?
+    
+    #+BEGIN_QUOTE
+    This doesn’t mean that you can’t make good use of Python on
+    multi-CPU machines! You just have to be creative with dividing the
+    work up between multiple processes rather than multiple threads.
+    Judicious use of C extensions will also help; if you use a C
+    extension to perform a time-consuming task, the extension can
+    release the GIL while the thread of execution is in the C code and
+    allow other threads to get some work done.
+    #+END_QUOTE
+
+  - See [[http://blog.snaplogic.com/?p%3D94][Juergen Brendel's]] ([[http://webcache.googleusercontent.com/searchq%3Dcache:diaDuHIgK5cJ:blog.snaplogic.com/%253Fp%253D94%2B&cd%3D1&hl%3Den&ct%3Dclnk&gl%3Dus&client%3Dopera][mirror]]) post:
+    
+    #+BEGIN_QUOTE
+    For those who are not familiar with the issue: The GIL is a single
+    lock inside of the Python interpreter, which effectively prevents
+    multiple threads from being executed in parallel, even on
+    multi-core or multi-CPU systems!
+    #+END_QUOTE
+    
+    Other forms of concurrency?
+    
+    #+BEGIN_QUOTE
+    Q. Multi-core processors will be standard even on laptops in the
+    near future. Is Python 3.0 going to get rid of the GIL (Global
+    Interpreter Lock) in order to be able to benefit from this
+    feature?
+
+    A. No. We’re not changing the CPython implementation much. Getting
+    rid of the GIL would be a massive rewrite of the interpreter
+    because all the internal data structures (and the reference
+    counting operations) would have to be made thread-safe. This was
+    tried once before (in the late ’90s by Greg Stein) and the
+    resulting interpreter ran twice as slow. If you have multiple CPUs
+    and you want to use them all, fork off as many processes as you
+    have CPUs. (You write your web application to be easily scalable,
+    don’t you? So if you can run several copies on different boxes it
+    should be trivial to run several copies on the same box as well.)
+    If you really want “true” multi-threading for Python, use Jython
+    or IronPython; the JVM and the CLR do support multi-CPU threads.
+    Of course, be prepared for deadlocks, live-locks, race conditions,
+    and all the other nuisances that come with multi-threaded code.
+    #+END_QUOTE
+
+    #+BEGIN_QUOTE
+    You see, Guido, if I really want to have a shared nothing system,
+    I can certainly implement that. I could do it with threads, or
+    with processes. But I rather use the threading API.
+    #+END_QUOTE
+
+  - See this [[http://www.dabeaz.com/GIL/][good talk by David Beazley]].
+** TODO Exceptions
+   Release the GIL when doing I/O or long-running computations which
+   don’t need access to Python objects; see [[http://docs.python.org/2/library/hashlib.html#module-hashlib][hashlib]] and [[http://docs.python.org/2/library/zlib.html#module-zlib][zlib]].
+
+   [[http://www.artima.com/forums/flat.jsp?forum%3D106&thread%3D214235&start%3D30&msRange%3D15][Interesting]]:
+
+   #+BEGIN_QUOTE
+   You can get quite far using the one-thread-per-request model (I
+   think frameworks like Django and TurboGears/Pylons use this), since
+   any individual web thread is typically I/O-bound: first you have to
+   wait until the entire request is received, then you wait for your
+   database, finally you wait until the client has received the last
+   byte of your request. By the time your server is no longer
+   I/O-bound but CPU-bound, you have likely hit upon a successful web
+   concept, and the last thing you want to do is have to rethink
+   everything in order to speed it up. So GIL removal sounds
+   attractive. (It also helps that most databases already address the
+   problem of concurrent access in one way or another, so this won’t
+   be a stumbling block.)
+   #+END_QUOTE
+
+   #+BEGIN_QUOTE
+   E.g. I believe that in the numpy world, GIL removal is pretty much
+   a non-issue: all their heavy lifting is done by C, C++ or Fortran
+   code, which can easily benefit from multiple CPUs by using special
+   vectorizing operations or by creating OS-level threads that aren’t
+   constrained by the GIL (since they don’t touch Python objects, only
+   arrays of numbers).
+   #+END_QUOTE
+
+   [[http://www.artima.com/forums/flat.jsp?forum%3D106&thread%3D214235&start%3D45&msRange%3D15][Apology]]:
+
+   #+BEGIN_QUOTE
+   I too have gone through phases where I thought I fully understood
+   threading, only to find yet deeper flaws in my understanding.
+   Here’s an article from IEEE Computer that helped me come to the
+   conclusion that threading is the wrong paradigm for writing
+   concurrent programs:
+   #+END_QUOTE
+
+   #+BEGIN_QUOTE
+   We have made an interesting case along the lines of multi-threaded
+   audio applications (meaning more than one audio thread). I have
+   described it on my blog here:
+
+   http://pkaudio.blogspot.com/2008/07/multiple-rt-threads-and-gil.html
+
+   Advantages to us for removing or migrating the GIL thus allowing us to
+   use threads instead of processes:
+
+   - Low startup speed overhead
+   - Low long-term memory footprint
+   - Easy debugging (very important)
+   - Being nice to the host sequencer app (they don’t expect many
+     processes)
+
+   Since we don’t use extension modules and therefore have more need for
+   the language than the entire VM platform, the problem becomes more
+   the execution environment instead of the algorithmic environment.
+   Since we run as a plugin in many host apps we should ideally run a
+   light-weight thread to do audio compilation. We want to be able to
+   script some control-rate computation, and are never allowed to
+   block in the audio thread.
+
+   interesting problem, really.
+   #+END_QUOTE
+
+** TODO Use cases
+
+   See this [[http://pkaudio.blogspot.com/2008/07/multiple-rt-threads-and-gil.html][audio article]].
+
+   I/O; see [[file:/tmp/Python-3.3.0/Python/random.c]]:
+
+   #+BEGIN_SRC c
+     Py_BEGIN_ALLOW_THREADS
+     fd = open("/dev/urandom", O_RDONLY);
+     /* [...] */
+     do {
+       do {
+         n = read(fd, buffer, (size_t)size);
+       } while (n < 0 && errno == EINTR);
+       if (n <= 0)
+         break;
+       buffer += n;
+       size -= (Py_ssize_t)n;
+      } while (0 < size);
+     Py_END_ALLOW_THREADS
+   #+END_SRC
+
+   Long-running computations which don’t require access to Python
+   objects; see [[file:/tmp/Python-3.3.0/Modules/zlibmodule.c]]:
+
+   #+BEGIN_SRC c
+     Py_BEGIN_ALLOW_THREADS;
+     err = deflate(&zst, Z_FINISH);
+     Py_END_ALLOW_THREADS;
+   #+END_SRC
+
+** TODO Take
+   Like castrated lambdas, one of those expedient initial decisions
+   Guido is forced to defend: “find a different mechanism for
+   concurrency than threads.”
+
+   Has inertia, despite being [[http://www.python.org/~guido/bio.html][50% python]].
