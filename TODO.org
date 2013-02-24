@@ -394,13 +394,12 @@
 
    Has inertia, despite being [[http://www.python.org/~guido/bio.html][50% python]].
 * TODO Statement
-  Guido’s position on the GIL is: “Use another mechanism for
-  concurrency (other than threads)!” I suspect the GIL was expedient
-  at some stage in Python’s development, but now represents technical
-  debt. Guido has some inertia (despite being being paid 50% to work
-  on Python) because any alternative to GIL (e.g. fine-grained locks
-  on mutable data structures) must be performant and backwards
-  compatible.
+  Guido’s position on the GIL is essentially: “Use another mechanism
+  (besides threads) for concurrency!” I suspect the GIL was expedient
+  at some stage in Python’s development, but has become technical
+  debt. Guido has some inertia (despite working half-time on Python)
+  because any alternative to GIL (e.g. fine-grained locks on mutable
+  data structures) must be performant and backwards compatible.
 
   Using =Py_BEGIN_ALLOW_THREADS= and =Py_END_ALLOW_THREADS=, it’s
   possible for extensions to bypass the GIL; typical use-cases are
@@ -424,7 +423,7 @@
     Py_END_ALLOW_THREADS
   #+END_SRC
 
-  Or when [[file:Modules/zlibmodule.c][Modules/zlibmodule.c]] deflates its =z_stream=:
+  or when [[file:Modules/zlibmodule.c][Modules/zlibmodule.c]] deflates its =z_stream=:
 
   #+BEGIN_SRC c
     Py_BEGIN_ALLOW_THREADS;
