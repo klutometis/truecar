@@ -394,16 +394,16 @@
 
    Has inertia, despite being [[http://www.python.org/~guido/bio.html][50% python]].
 * TODO Statement
-  Guido’s position on the GIL is essentially: “Use another mechanism
-  (besides threads) for concurrency!” I suspect the GIL was expedient
-  at some stage in Python’s development, but has become technical
-  debt. Guido has some inertia (despite working half-time on Python)
-  because any alternative to GIL (e.g. fine-grained locks on mutable
-  data structures) must be performant and backwards compatible.
+  Guido’s position on the GIL can be paraphrased as: “Use another
+  mechanism (besides threads) for concurrency!” The GIL was expedient
+  at some stage in Python’s development,[fn:1] but has become a form
+  of technical debt. Since any alternative to GIL (e.g. fine-grained
+  locks on mutable data structures) must be performant and backwards
+  compatible, there is inertia against changing it.
 
   Using =Py_BEGIN_ALLOW_THREADS= and =Py_END_ALLOW_THREADS=, it’s
   possible for extensions to bypass the GIL; typical use-cases are
-  blocking I/O and long Python-agnostic computations.
+  blocking I/O and long Python-agnostic computation.
 
   See, for example, when [[file:Python/random.c][Python/random.c]] reads from =/dev/urandom=:
 
@@ -423,10 +423,24 @@
     Py_END_ALLOW_THREADS
   #+END_SRC
 
-  or when [[file:Modules/zlibmodule.c][Modules/zlibmodule.c]] deflates its =z_stream=:
+  See also when [[file:Modules/zlibmodule.c][Modules/zlibmodule.c]] deflates its =z_stream=:
 
   #+BEGIN_SRC c
     Py_BEGIN_ALLOW_THREADS;
     err = deflate(&zst, Z_FINISH);
     Py_END_ALLOW_THREADS;
   #+END_SRC
+
+* Footnotes
+
+[fn:1] See [[http://docs.python.org/2/glossary.html#term-gil][here]]:
+
+  #+BEGIN_QUOTE
+  This simplifies the CPython implementation by making the object
+  model (including critical built-in types such as dict) implicitly
+  safe against concurrent access.
+
+  It is believed that overcoming this performance issue would make the
+  implementation much more complicated and therefore costlier to
+  maintain.
+  #+END_QUOTE
