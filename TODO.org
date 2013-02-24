@@ -397,9 +397,9 @@
   Guido’s position on the GIL can be paraphrased as: “Use another
   mechanism (besides threads) for concurrency!” The GIL was expedient
   at some stage in Python’s development,[fn:1] but has become a form
-  of technical debt. Since any alternative to GIL (e.g. fine-grained
-  locks on mutable data structures) must be performant and backwards
-  compatible, there is inertia against changing it.
+  of technical debt. Since any alternative to the GIL (e.g.
+  fine-grained locks on mutable data structures) must be performant
+  and backwards compatible, there is inertia against changing it.
 
   Using =Py_BEGIN_ALLOW_THREADS= and =Py_END_ALLOW_THREADS=, it’s
   possible to bypass the GIL; typical use-cases are blocking I/O and
