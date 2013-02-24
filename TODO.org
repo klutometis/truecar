@@ -397,8 +397,8 @@
   Guido’s position on the GIL can be paraphrased as: “Use another
   mechanism (besides threads) for concurrency!” I suspect that the GIL
   was expedient at some stage in Python’s development,[fn:1] but has
-  since become a source technical debt. Since any alternative to the
-  GIL (e.g. fine-grained locks on mutable data structures) must be
+  since become a source of technical debt. Since any alternative to
+  the GIL (e.g. fine-grained locks on mutable data structures) must be
   performant and backwards compatible, there is inertia against
   changing it.
 
