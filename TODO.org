@@ -402,8 +402,8 @@
   compatible, there is inertia against changing it.
 
   Using =Py_BEGIN_ALLOW_THREADS= and =Py_END_ALLOW_THREADS=, it’s
-  possible for extensions to bypass the GIL; typical use-cases are
-  blocking I/O and long Python-agnostic computation.
+  possible to bypass the GIL; typical use-cases are blocking I/O and
+  long Python-agnostic computation.
 
   See, for example, when [[file:Python/random.c][Python/random.c]] reads from =/dev/urandom=:
 
