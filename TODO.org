@@ -1,3 +1,7 @@
+* TODO Django service
+  - http://django-tastypie.readthedocs.org/en/latest/
+  - http://django-rest-framework.org/
+  - http://stackoverflow.com/questions/7303313/what-are-the-differences-between-django-tastypie-and-djangorestframework
 * TODO GIL
   - [[http://jessenoller.com/blog/2009/02/01/python-threads-and-the-global-interpreter-lock][Wordy]], but not bad.
 
