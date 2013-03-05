@@ -14,9 +14,7 @@ def search(request):
         .filter(body__istartswith=body)\
         .all()\
         .order_by('-year', 'make', 'model', 'body')
-    return HttpResponse(json.dumps(list(['%s %s %s %s' % (vehicle.year,
-                                                          vehicle.make,
-                                                          vehicle.model,
-                                                          vehicle.body)
-                                         for vehicle in vehicles])),
+    return HttpResponse(json.dumps(list({'label': str(vehicle),
+                                         'value': vehicle.id}
+                                        for vehicle in vehicles)),
                         content_type='application/json')
