@@ -10,14 +10,22 @@
   </head>
   <body>
     <h1>Vehicle search</h1>
+    <h2>Notes</h2>
     <p>The following implements a prefix-based lookahead which is
-    order-sensitive (year, make, model, body).</p>
-    <p>"<strong>2012 ben</strong>", for instance, will match
-    "<strong>2012 Bentley Continental GT Coupe</strong>" and
-    "<strong>2012 Bentley Mulsanne Sedan</strong>"</p>
-    <p>On the other hand, "<strong>ben 2012</strong>" won't match
-    anything.</p>
+      order-sensitive (year, make, model, body). "<strong>2012
+      ben</strong>", for instance, will match "<strong>2012 Bentley
+      Continental GT Coupe</strong>" and "<strong>2012 Bentley
+      Mulsanne Sedan</strong>." On the other hand, "<strong>ben
+      2012</strong>" won't match anything.</p>
+    <p>At least one record in the database was defective (<strong>2014
+        Chevrolet Impala Sedan</strong>); I did my best to swap in
+        some reasonable defaults.</p>
     <h2>Search</h2>
+    <ol>
+      <li>Start typing by year;</li>
+      <li>select a model from the drop-down to activate the
+        details.</li>
+    </ol>
     <label for="search">Year, make, model, body: </label>
     <input id="search" />
     <h2>Details</h2>
