@@ -1,3 +1,12 @@
+* TODO WSGI
+  These settings:
+
+  #+BEGIN_SRC apache
+    LoadModule wsgi_module modules/mod_wsgi.so
+    WSGIScriptAlias /truecar /path/to/truecar.wsgi
+    Alias /truecar/static/ /path/to/truecar/static/
+    
+  #+END_SRC
 * TODO Just take the url-parsing stuff into truecar.
   Don’t delegate to the apps; it may be best-practice, but it’s
   cumbersome.
