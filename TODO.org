@@ -1,3 +1,7 @@
+* TODO Just take the url-parsing stuff into truecar.
+  Don’t delegate to the apps; it may be best-practice, but it’s
+  cumbersome.
+* TODO Move models to truecar away from search.
 * TODO Import data
   #+BEGIN_SRC sh :tangle data/import-data.sh :shebang #!/usr/bin/env bash
     DATADIR=$(echo 'select @@datadir;' | mysql | tail -n 1)
