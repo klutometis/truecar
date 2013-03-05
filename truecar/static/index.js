@@ -8,4 +8,10 @@ $(function() {
               response(data);
             });
     },
+    select: function(event, ui){
+      event.preventDefault();
+      $("#search").val(ui.item.label);
+      $("#details").empty()
+      $("#details").append($("<dt>").append("harro")).append($("<dd>").append("thar"))
+    }});
 })
