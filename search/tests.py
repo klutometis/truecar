@@ -14,26 +14,21 @@ from django.utils import simplejson as json
 
 from models import Vehicle
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
+def save_a_basic_vehicle():
+    vehicle = Vehicle(make='Kia',
+                      model='Sorento',
+                      body='SUV',
+                      flag=0,
+                      year=2014,
+                      MSRP=24950.0,
+                      details='http://www.truecar.com/prices-new/kia/sorento-pricing/2014/58BAB7AA',
+                      image='http://img.truecar.com/colorid_images/v1/959520/175x90/f3q')
+    vehicle.save()
+    
 
 class SearchTest(TestCase):
-    def test_get(self):
-        # response = self.client.get(reverse('search'), {'term': '2014+kia'})
-        vehicle = Vehicle(make='Kia',
-                          model='Sorento',
-                          body='SUV',
-                          flag=0,
-                          year=2014,
-                          MSRP=24950.0,
-                          details='http://www.truecar.com/prices-new/kia/sorento-pricing/2014/58BAB7AA',
-                          image='http://img.truecar.com/colorid_images/v1/959520/175x90/f3q')
-        vehicle.save()
-        c = Client()
+    def test_search(self):
+        save_a_basic_vehicle()
         response = self.client.get(reverse('search'), {'term': '2014 kia'})
         self.assertEqual(json.loads(response.content),
                          [{"value": 1, "label": "2014 Kia Sorento SUV"}])
