@@ -1,3 +1,7 @@
 #search {
     width: 24em;
 }
+
+dt {
+    font-weight: bold;
+}
