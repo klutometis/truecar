@@ -18,3 +18,9 @@ class Vehicle(models.Model):
     MSRP = models.FloatField()
     details = models.CharField(max_length=255)
     image = models.CharField(max_length=255)
+
+    def __unicode__(self):
+        return '%s %s %s %s' % (self.year,
+                                self.make,
+                                self.model,
+                                self.body)
