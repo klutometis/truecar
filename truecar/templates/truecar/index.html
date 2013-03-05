@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.1/themes/base/jquery-ui.css" />
+      <link rel="stylesheet" href="static/index.css" />
+
+      <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+      <script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+      <script src="static/index.js"></script>
+  </head>
+  <body>
+    <h1>Vehicle search</h1>
+    <p>The following implements a prefix-based lookahead which is
+    order-sensitive (year, make, model, body).</p>
+    <p>"<strong>2012 ben</strong>", for instance, will match
+    "<strong>2012 Bentley Continental GT Coupe</strong>" and
+    "<strong>2012 Bentley Mulsanne Sedan</strong>"</p>
+    <p>On the other hand, "<strong>ben 2012</strong>" won't match
+    anything.</p>
+    <form>
+      <label for="search">Year, make, model, body: </label>
+      <input id="search" />
+      <input type="submit" value="Go" />
+    </form>
+  </body>
+</html>

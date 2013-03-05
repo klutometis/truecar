@@ -1,3 +1,61 @@
+* TODO Import data
+  #+BEGIN_SRC sh
+    mysqlimport \
+        -c make,model,body,flag,year,MSRP,details,image \
+        --fields-terminated-by="\t" \
+        search \
+        search_vehicle.tsv
+  #+END_SRC
+* TODO Homework
+  #+BEGIN_EXAMPLE
+    Vehicle Search
+    ===============
+    
+    Our product team has come up with new criteria for a car search
+    engine. The UI is a basic search interface (a single text box and a
+    "go" button). It needs to display results for matches on a complete
+    vehicle name: model year (2011, 2010, 2009), vehicle make (Ford,
+    Honda, Toyota), model (5 Series, 911, Accord) and body style
+    (Convertible, Hybrid, Sedan). You should support typeahead search,
+    with behavior similar to amazon.com - see attached screen shot.
+    
+    The typeahead choices should look like:
+    2011 Acura TL Sedan
+    2011 Audi A3 Sedan
+    ...etc
+    
+    The typeahead choices should also be sorted:
+    first by model year descending (2011 before 2010)
+    then alphabetically (Acura before Audi)
+    
+    You are free to use any production-ready library/ies to help you
+    implement the typeahead search.
+    
+    Once you have selected a result, it should jump to a page displaying
+    all the fields in that record (any URL fields should be links, images
+    should display inline). This page can be *very* basic - it must be
+    readable but does not need any other special formatting other than to
+    be valid, well-structured HTML (unless you feel like showing off any
+    HTML/CSS skills).
+    
+    As a member of the TrueCar.com team, write a small Django service
+    built on whatever database you are comfortable with (use MySQL if you
+    don't have a preference) that implements this functionality. We've
+    provided a dataset as a tsv file that includes the make, model and
+    body style data needed to query against as well as the extra fields
+    you will need to display.
+    
+    You will be evaluated on all aspects of your solution, but we will
+    focus on your ability to design and write code, and make appropriate
+    library choices for a production environment.
+    
+    Feel free to include notes about known issues, areas for improvement,
+    what you would do in version 2, etc.
+    
+  #+END_EXAMPLE
+
+  Things like [[https://github.com/yourlabs/django-autocomplete-light][autocomplete-light]] and [[https://github.com/crucialfelix/django-ajax-selects][ajax-selects]] are general
+  solutions to autocomplete, but horribly complex.  
 * TODO Django service
   - http://django-tastypie.readthedocs.org/en/latest/
   - http://django-rest-framework.org/
@@ -399,12 +457,13 @@
    Has inertia, despite being [[http://www.python.org/~guido/bio.html][50% python]].
 * TODO Statement
   Guido’s position on the GIL can be paraphrased as: “use another
-  mechanism (besides threads) for concurrency!” I suspect that the GIL
-  was expedient at some stage in Python’s development,[fn:1] but has
-  since become a source of technical debt. Since any alternative to
-  the GIL (e.g. fine-grained locks on mutable data structures) must be
-  performant and backwards compatible, there is inertia against
-  changing it.
+  mechanism (besides threads) for parallelism!” (See Rob Pike’s talk
+  on [[http://vimeo.com/49718712][Concurrency is not Parallelism]].) I suspect that the GIL was
+  expedient at some stage in Python’s development,[fn:1] but has since
+  become a source of technical debt. Since any alternative to the GIL
+  (e.g. fine-grained locks on mutable data structures and parallel
+  threads) must be performant and backwards compatible, there is
+  inertia against changing it.
 
   Using =Py_BEGIN_ALLOW_THREADS= and =Py_END_ALLOW_THREADS=, it’s
   possible to bypass the GIL; typical use-cases are blocking I/O and
@@ -441,7 +500,7 @@
 [fn:1] See [[http://docs.python.org/2/glossary.html#term-gil][here]]:
 
   #+BEGIN_QUOTE
-  This simplifies the CPython implementation by making the object
+  [The GIL] simplifies the CPython implementation by making the object
   model (including critical built-in types such as dict) implicitly
   safe against concurrent access. . . It is believed that overcoming
   this performance issue would make the implementation much more
