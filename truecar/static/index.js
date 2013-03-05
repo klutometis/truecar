@@ -2,7 +2,7 @@ $(function() {
   $("#search").autocomplete({
     // source: "search/"
     source: function(request, response) {
-      $.get("search/",
+      $.get("truecar/search/",
             {term: request.term},
             function(data) {
               response(data);
@@ -12,7 +12,7 @@ $(function() {
       event.preventDefault();
       $("#search").val(ui.item.label);
       $("#details").empty()
-      $.get("details/" + ui.item.value + "/",
+      $.get("truecar/details/" + ui.item.value + "/",
            function (vehicle) {
              var flag;
              var default_image = "http://img.truecar.com/colorid_images/v1/None/175x90/f3q";
