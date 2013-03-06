@@ -23,4 +23,4 @@ class Detailstest(TestCase):
                           'year': 2014,
                           'model': 'Sorento',
                           'image': 'http://img.truecar.com/colorid_images/v1/959520/175x90/f3q',
-                          'MSRP': 24950.0})
+                          'MSRP': '$24,950.00'})
