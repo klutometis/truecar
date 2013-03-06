@@ -5,6 +5,8 @@ import os
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
+ALLOWED_HOSTS = ['wikitex.org']
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
