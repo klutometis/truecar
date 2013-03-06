@@ -13,7 +13,7 @@
   it’s possible to bypass the GIL; typical use-cases are blocking I/O
   and long Python-agnostic computation.
 
-  See, for example, when [[file:Python/random.c][Python/random.c]] reads from =/dev/urandom=:
+  See, for example, when [[http://hg.python.org/cpython/file/b87e9b8dc9ad/Python/random.c#l136][Python/random.c]] reads from =/dev/urandom=:
 
   #+BEGIN_SRC c
     Py_BEGIN_ALLOW_THREADS
@@ -31,7 +31,7 @@
     Py_END_ALLOW_THREADS
   #+END_SRC
 
-  See also when [[file:Modules/zlibmodule.c][Modules/zlibmodule.c]] deflates its =z_stream=:
+  See also when [[http://hg.python.org/cpython/file/b87e9b8dc9ad/Modules/zlibmodule.c#l202][Modules/zlibmodule.c]] deflates its =z_stream=:
 
   #+BEGIN_SRC c
     Py_BEGIN_ALLOW_THREADS;
