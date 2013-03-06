@@ -9,8 +9,8 @@
   will not run in parallel; instead, the GIL will try to switch
   between them at =sys.setcheckinterval()=.
 
-  The GIL was expedient at some point in CPython’s development,[fn:2]
-  and there is too much inertia to change it.[fn:3] Furthermore, any
+  The GIL was expedient at some point in CPython’s development[fn:2]
+  and there is too much inertia to change it;[fn:3] furthermore, any
   alternative to the GIL (e.g. fine-grained locks on mutable data
   structures) must be performant and backwards compatible.
 
