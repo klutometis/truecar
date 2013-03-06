@@ -13,7 +13,7 @@ def details(request, vehicle_id):
                                     'body': vehicle.body,
                                     'flag': vehicle.flag,
                                     'year': vehicle.year,
-                                    'MSRP': vehicle.MSRP,
+                                    'MSRP': '$' + format(vehicle.MSRP, ',.2f'),
                                     'details': vehicle.details,
                                     'image': vehicle.image}),
                         content_type='application/json')
