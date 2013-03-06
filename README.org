@@ -1,6 +1,6 @@
 * The GIL
-  CPython’s GIL is a classic case of “concurrency is not
-  parallelism:”[fn:1] threads can be spawned and started, but they
+  CPython’s GIL is a classic case of “[[http://blog.golang.org/2013/01/concurrency-is-not-parallelism.html][concurrency is not
+  parallelism]]:”[fn:1] threads can be spawned and started, but they
   will not run in parallel; instead, the GIL will try to switch
   between them at =sys.setcheckinterval()=.
 
