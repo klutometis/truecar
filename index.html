@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>README</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="README"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2013-03-06 03:21:32 PST"/>
+<meta name="author" content="Peter Danenberg"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">README</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Search</a></li>
+<li><a href="#sec-2">2 The GIL</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Search</h2>
+<div class="outline-text-2" id="text-1">
+
+
+<p>
+  See <a href="http://wikitex.org/truecar">TrueCar search</a> in action.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> The GIL</h2>
+<div class="outline-text-2" id="text-2">
+
+
+<p>
+  CPython’s GIL is a classic case of “<a href="http://blog.golang.org/2013/01/concurrency-is-not-parallelism.html">concurrency is not parallelism</a>:”<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup> threads can be spawned and started, but they
+  will not run in parallel; instead, the GIL will try to switch
+  between them at <code>sys.setcheckinterval()</code>.
+</p>
+<p>
+  The GIL was expedient at some point in CPython’s development<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>
+  and there is too much inertia to change it;<sup><a class="footref" name="fnr.3" href="#fn.3">3</a></sup> furthermore, any
+  alternative to the GIL (e.g. fine-grained locks on mutable data
+  structures) must be performant and backwards compatible.
+</p>
+<p>
+  Using <code>Py_BEGIN_ALLOW_THREADS</code> and <code>Py_END_ALLOW_THREADS</code>, however,
+  it’s possible to bypass the GIL; typical use-cases are blocking I/O
+  and long Python-agnostic computation.
+</p>
+<p>
+  See, for example, when <a href="http://hg.python.org/cpython/file/b87e9b8dc9ad/Python/random.c#l136">Python/random.c</a> reads from <code>/dev/urandom</code>:
+</p>
+
+
+
+<pre class="src src-c"><span style="color: #00cd00;">Py_BEGIN_ALLOW_THREADS</span>
+<span style="color: #cdcd00;">fd</span> = open(<span style="color: #00cd00;">"/dev/urandom"</span>, O_RDONLY);
+<span style="color: #cdcd00;">/* </span><span style="color: #cdcd00;">[...] </span><span style="color: #cdcd00;">*/</span>
+<span style="color: #00cdcd; font-weight: bold;">do</span> {
+  <span style="color: #00cdcd; font-weight: bold;">do</span> {
+    n = read(fd, buffer, (<span style="color: #00cd00;">size_t</span>)size);
+  } <span style="color: #00cdcd; font-weight: bold;">while</span> (n &lt; 0 &amp;&amp; errno == EINTR);
+  <span style="color: #00cdcd; font-weight: bold;">if</span> (n &lt;= 0)
+    <span style="color: #00cdcd; font-weight: bold;">break</span>;
+  buffer += n;
+  size -= (<span style="color: #00cd00;">Py_ssize_t</span>)n;
+ } <span style="color: #00cdcd; font-weight: bold;">while</span> (0 &lt; size);
+Py_END_ALLOW_THREADS
+</pre>
+
+
+<p>
+  See also when <a href="http://hg.python.org/cpython/file/b87e9b8dc9ad/Modules/zlibmodule.c#l202">Modules/zlibmodule.c</a> deflates its <code>z_stream</code>:
+</p>
+
+
+
+<pre class="src src-c">Py_BEGIN_ALLOW_THREADS;
+err = deflate(&amp;zst, Z_FINISH);
+Py_END_ALLOW_THREADS;
+</pre>
+
+
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> See
+<a href="http://blog.golang.org/2013/01/concurrency-is-not-parallelism.html">Rob Pike's eponymous talk</a>.
+</p>
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> See <a href="http://docs.python.org/2/glossary.html#term-gil">the Python glossary</a>: “[The GIL] simplifies the CPython
+  implementation by making the object model (including critical
+  built-in types such as dict) implicitly safe against concurrent
+  access.”
+</p>
+
+
+<p class="footnote"><sup><a class="footnum" name="fn.3" href="#fnr.3">3</a></sup> See the <a href="http://www.artima.com/weblogs/viewpost.jspthread=211200">Python 3000 FAQ</a>: “Getting rid of the GIL would be a
+  massive rewrite of the interpreter because all the internal data
+  structures (and the reference counting operations) would have to be
+  made thread-safe.”
+</p>
+
+
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2013-03-06 03:21:32 PST</p>
+<p class="author">Author: Peter Danenberg</p>
+<p class="creator">Org version 7.8.11 with Emacs version 24</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>
