@@ -2,11 +2,11 @@
 
 import os
 
-DEBUG = False
+# I've had to enable DEBUG after random 500s.
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-# ALLOWED_HOSTS = ['.wikitex.org']
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['.wikitex.org']
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
