@@ -1,0 +1,54 @@
+* The GIL
+  CPython’s GIL is a classic case of “concurrency is not
+  parallelism:”[fn:1] threads can be spawned and started, but they
+  will not run in parallel; instead, the GIL will try to switch
+  between them at =sys.setcheckinterval()=.
+
+  The GIL was expedient at some point in CPython’s development,[fn:2]
+  and there is too much inertia to change it.[fn:3] Furthermore, any
+  alternative to the GIL (e.g. fine-grained locks on mutable data
+  structures) must be performant and backwards compatible.
+
+  Using =Py_BEGIN_ALLOW_THREADS= and =Py_END_ALLOW_THREADS=, however,
+  it’s possible to bypass the GIL; typical use-cases are blocking I/O
+  and long Python-agnostic computation.
+
+  See, for example, when [[file:Python/random.c][Python/random.c]] reads from =/dev/urandom=:
+
+  #+BEGIN_SRC c
+    Py_BEGIN_ALLOW_THREADS
+    fd = open("/dev/urandom", O_RDONLY);
+    /* [...] */
+    do {
+      do {
+        n = read(fd, buffer, (size_t)size);
+      } while (n < 0 && errno == EINTR);
+      if (n <= 0)
+        break;
+      buffer += n;
+      size -= (Py_ssize_t)n;
+     } while (0 < size);
+    Py_END_ALLOW_THREADS
+  #+END_SRC
+
+  See also when [[file:Modules/zlibmodule.c][Modules/zlibmodule.c]] deflates its =z_stream=:
+
+  #+BEGIN_SRC c
+    Py_BEGIN_ALLOW_THREADS;
+    err = deflate(&zst, Z_FINISH);
+    Py_END_ALLOW_THREADS;
+  #+END_SRC
+
+* Footnotes
+
+[fn:1] See [[http://blog.golang.org/2013/01/concurrency-is-not-parallelism.html][Rob Pike's eponymous talk]].
+
+[fn:2] See [[http://docs.python.org/2/glossary.html#term-gil][the Python glossary]]: “[The GIL] simplifies the CPython
+  implementation by making the object model (including critical
+  built-in types such as dict) implicitly safe against concurrent
+  access.”
+
+[fn:3] See the [[http://www.artima.com/weblogs/viewpost.jspthread%3D211200][Python 3000 FAQ]]: “Getting rid of the GIL would be a
+  massive rewrite of the interpreter because all the internal data
+  structures (and the reference counting operations) would have to be
+  made thread-safe.”
